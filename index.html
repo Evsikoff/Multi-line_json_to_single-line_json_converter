@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON → Однострочный</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --muted: #9ca3af;
+        --text: #e5e7eb;
+        --accent: #22c55e;
+        --warn: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          "Helvetica Neue", Arial;
+        background: radial-gradient(
+            1200px 800px at 80% -20%,
+            #1f2937,
+            #0b1022 60%
+          ),
+          var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0 0 18px;
+      }
+      p.desc {
+        margin: 0 0 16px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .card {
+        background: linear-gradient(180deg, #0b1220, #0b111a);
+        border: 1px solid #1f2937;
+        border-radius: 14px;
+        padding: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      }
+      .card h2 {
+        margin: 6px 0 10px;
+        font-size: 16px;
+        color: #cbd5e1;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 320px;
+        resize: vertical;
+        border-radius: 10px;
+        padding: 12px 12px;
+        border: 1px solid #334155;
+        background: #0a0f1a;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.45;
+        outline: none;
+        box-shadow: inset 0 0 0 1px transparent;
+        transition: box-shadow 0.15s, border-color 0.15s;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+      }
+      textarea:focus {
+        border-color: #475569;
+        box-shadow: inset 0 0 0 1px #475569;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      button,
+      .checkbox {
+        border-radius: 10px;
+        padding: 10px 14px;
+        border: 1px solid #334155;
+        background: #0b1120;
+        color: var(--text);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: transform 0.03s ease-in, background 0.15s,
+          border-color 0.15s;
+      }
+      button:hover {
+        background: #0d1426;
+        border-color: #445069;
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      button.primary {
+        background: #102a1a;
+        border-color: #1e4d2b;
+      }
+      button.primary:hover {
+        background: #12321f;
+        border-color: #2a6a3b;
+      }
+      .ghost {
+        background: transparent;
+      }
+      .ok {
+        color: #86efac;
+      }
+      .err {
+        color: var(--warn);
+      }
+      .bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 0 8px;
+      }
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .checkbox {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .checkbox input {
+        accent-color: #22c55e;
+        width: 16px;
+        height: 16px;
+      }
+      .status {
+        min-height: 20px;
+        font-size: 13px;
+      }
+      footer {
+        margin-top: 18px;
+        color: #64748b;
+        font-size: 12px;
+        text-align: center;
+      }
+      .kbd {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        background: #0b1020;
+        border: 1px solid #23314a;
+        padding: 1px 6px;
+        border-radius: 6px;
+        color: #cbd5e1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>JSON → однострочный (минимизация)</h1>
+      <p class="desc">
+        Вставьте многострочный JSON слева и нажмите <b>Преобразовать</b> —
+        справа получите валидный однострочный JSON.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <div class="bar">
+            <h2>Исходный JSON</h2>
+            <div class="row">
+              <button id="btnSample" class="ghost">Пример</button>
+              <button id="btnClear" class="ghost">Очистить</button>
+            </div>
+          </div>
+          <textarea
+            id="input"
+            placeholder='{
+  "user": { "id": 1, "name": "Ada" },
+  "active": true,
+  "tags": ["math", "logic"]
+}'
+          ></textarea>
+          <div class="row" style="margin-top: 10px">
+            <button id="btnConvert" class="primary">Преобразовать</button>
+            <label class="checkbox"
+              ><input id="autoOnPaste" type="checkbox" checked />Автоконвертация
+              при вставке</label
+            >
+            <span class="hint"
+              >Совет: можно просто вставить JSON в это поле — он преобразуется
+              сам.</span
+            >
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="bar">
+            <h2>Результат</h2>
+            <div class="row">
+              <button id="btnCopy">Скопировать</button>
+              <button id="btnDownload">Скачать .json</button>
+            </div>
+          </div>
+          <textarea
+            id="output"
+            placeholder='{"user":{"id":1,"name":"Ada"},"active":true,"tags":["math","logic"]}'
+            readonly
+          ></textarea>
+          <div id="status" class="status"></div>
+        </div>
+      </div>
+
+      <footer>
+        Горячие клавиши: <span class="kbd">Ctrl/⌘+Enter</span> — преобразовать,
+        <span class="kbd">Ctrl/⌘+B</span> — копировать результат
+      </footer>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const input = $("input");
+      const output = $("output");
+      const statusEl = $("status");
+      const btnConvert = $("btnConvert");
+      const btnCopy = $("btnCopy");
+      const btnDownload = $("btnDownload");
+      const btnClear = $("btnClear");
+      const btnSample = $("btnSample");
+      const autoOnPaste = $("autoOnPaste");
+
+      function convert() {
+        const text = input.value.trim();
+        if (!text) {
+          output.value = "";
+          setStatus("Введите JSON для преобразования", "hint");
+          return;
+        }
+        try {
+          // Допускаем «JSON-подобный» ввод: если начинается с { или [, парсим как JSON, иначе — сообщаем об ошибке.
+          if (!/^\s*[\{\[]/.test(text)) {
+            throw new Error("Ожидался JSON, начинающийся с { или [");
+          }
+          const obj = JSON.parse(text);
+          const oneLine = JSON.stringify(obj);
+          output.value = oneLine;
+          setStatus("Готово ✔ Минимизация успешна", "ok");
+        } catch (e) {
+          setStatus("Ошибка: " + e.message, "err");
+        }
+      }
+
+      function setStatus(msg, kind = "hint") {
+        statusEl.className =
+          "status " + (kind === "ok" ? "ok" : kind === "err" ? "err" : "");
+        statusEl.textContent = msg;
+      }
+
+      btnConvert.addEventListener("click", convert);
+
+      btnCopy.addEventListener("click", async () => {
+        if (!output.value) {
+          setStatus("Нечего копировать", "hint");
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(output.value);
+          setStatus("Скопировано в буфер обмена", "ok");
+        } catch {
+          setStatus("Не удалось скопировать", "err");
+        }
+      });
+
+      btnDownload.addEventListener("click", () => {
+        if (!output.value) {
+          setStatus("Нечего скачивать", "hint");
+          return;
+        }
+        const blob = new Blob([output.value], {
+          type: "application/json;charset=utf-8",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "minified.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        setStatus("Файл скачан: minified.json", "ok");
+      });
+
+      btnClear.addEventListener("click", () => {
+        input.value = "";
+        output.value = "";
+        setStatus("Поле очищено", "hint");
+      });
+
+      btnSample.addEventListener("click", () => {
+        input.value = `{
+  "user": { "id": 1, "name": "Ada" },
+  "active": true,
+  "tags": ["math", "logic"],
+  "notes": "многострочный → однострочный"
+}`;
+        setStatus("Загружен пример. Нажмите «Преобразовать».", "hint");
+      });
+
+      // Автоконвертация при вставке
+      input.addEventListener("paste", (ev) => {
+        if (!autoOnPaste.checked) return;
+        // Дадим вставке завершиться, затем преобразуем
+        requestAnimationFrame(convert);
+      });
+
+      // Горячие клавиши
+      window.addEventListener("keydown", (e) => {
+        const cmd = e.ctrlKey || e.metaKey;
+        if (cmd && e.key.toLowerCase() === "enter") {
+          e.preventDefault();
+          convert();
+        }
+        if (cmd && e.key.toLowerCase() === "b") {
+          e.preventDefault();
+          btnCopy.click();
+        }
+      });
+
+      // Подсказка при старте
+      setStatus("Вставьте JSON слева и нажмите «Преобразовать».", "hint");
+    </script>
+  </body>
+</html>
