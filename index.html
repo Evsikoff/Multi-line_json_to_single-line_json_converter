@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>JSON → Однострочный</title>
+    <script src="https://unpkg.com/@vkontakte/vk-bridge@^2/dist/browser.min.js"></script>
     <style>
       :root {
         --bg: #0f172a;
@@ -230,6 +231,10 @@
     </div>
 
     <script>
+      if (window.vkBridge?.send) {
+        vkBridge.send("VKWebAppInit");
+      }
+
       const $ = (id) => document.getElementById(id);
       const input = $("input");
       const output = $("output");
